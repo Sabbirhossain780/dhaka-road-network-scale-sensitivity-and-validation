@@ -1,8 +1,9 @@
 # Dhaka Road Topology Pipeline
 
 > **Status: work in progress.** The pipeline runs end-to-end and its output
-> is validated bit-for-bit against the original notebooks (see
-> [Validation](#validation--the-port-changed-nothing) below). The
+> was verified bit-for-bit against the original notebooks (see
+> [Validation](#validation--the-port-changed-nothing) below — a recorded
+> result, no longer re-executable). The
 > *underlying clustering result itself* is weak — see
 > [Known Limitations](#known-limitations) before citing any cluster labels
 > as a real finding.
@@ -51,12 +52,24 @@ dhaka_topology/            the pipeline package
 configs/                   one YAML per variant (v1, v3, v2km, thana)
 tests/                     17 unit tests on the pure functions
 compare_outputs.py         diffs this pipeline's output against the
-                            original notebooks' saved results
-results/                   a full run's output (see below) — this is the
-                            actual analysis result, not just example output
+                            original notebooks' saved results (kept as a
+                            record — its reference data has been deleted,
+                            see Validation)
+results/                   a snapshot of ONE run (configs/v3.yaml, 1km, 827
+                            zones, Sep 2026) — predates the experiment sequence.
+                            Much of its clustering output is SUPERSEDED; see
+                            results/README.md for what still stands and where
+                            the current findings live (experiments/).
 ```
 
 ### `results/` — what a full run over 827 zones produced
+
+> **Read [`results/README.md`](results/README.md) first.** This snapshot is from
+> the 1km run and predates Experiments 06-15b. The clustering outputs in it
+> (`cluster_assignments.csv`, `cluster_choropleth.png`, `pca_clusters.png`,
+> `uffm_*.csv`, the Folium map) are **superseded** — the k=2 split is
+> substantially a zone-size confound, with cluster means of 51.6 vs 544.3 nodes.
+> The betweenness/GAT outputs and the feature tables still stand.
 
 ```
 results/outputs/csv/
@@ -187,7 +200,7 @@ their own, independent of the clustering work above.
   flags several features (mostly the same ones later found to be
   size-confounded) with CV well above 0.35 under 80%-node resampling.
 
-None of the above is a code bug — the pipeline is validated bit-for-bit
+None of the above is a code bug — the pipeline was verified bit-for-bit
 against the original notebooks (see Validation below). The weak initial
 result and the confound that explained it were both genuine properties of
 the feature set and the data, tracked down through the experiment sequence
@@ -219,8 +232,17 @@ the notebooks bit-for-bit and matches the `results/` snapshot; set `harmonic`
 when regenerating. Experiment 12 found the choice does not change UFFM's
 conclusion either way — its k=2 split is a density split, not a geometry one.
 
-`compare_outputs.py` is the tool that did this diff. It's included so the
-same check can be re-run if the pipeline changes.
+`compare_outputs.py` is the tool that produced this diff, and it is kept in
+the repo as the record of how the comparison was made.
+
+> **The comparison can no longer be re-executed.** It read the original
+> notebooks' saved outputs from `backup_original_topology/`, which was deleted
+> during a project cleanup. The results above are a recorded finding, not a
+> reproducible check. Re-establishing it would mean re-running the original
+> notebooks (archived in `archive/notebooks/`) to regenerate their outputs
+> first. The pipeline's *own* outputs remain fully reproducible from
+> `run_pipeline.py`; it is only the comparison against the notebook-era
+> baseline that is no longer available.
 
 **Not yet validated:** the `tile` stage (Stage 2 — grid construction from a
 freshly downloaded OSM graph) and the `thana` zone unit. Both are direct

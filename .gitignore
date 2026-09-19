@@ -46,3 +46,13 @@ desktop.ini
 02_dhaka_road_topology/pipeline/experiments/11_city_mixture_map/windows.csv
 02_dhaka_road_topology/pipeline/experiments/13_morphology_criticality/nodes_morphology.csv
 02_dhaka_road_topology/pipeline/experiments/13_morphology_criticality/window_fragility.csv
+
+# results/: per-zone betweenness artefacts are untracked.
+#   gat/csv/Zone_DH*/nodes_bc.csv  - 822 files, 22 MB, byte-for-byte subsets of
+#     all_nodes_bc.csv (identical columns and row counts). No extra information.
+#   gat/plots/                     - 822 per-zone hierarchy maps, 111 MB,
+#     regenerable in ~25 min by re-running the betweenness stage.
+# The city-level figures, the two summary CSVs and every outputs/ file stay
+# tracked. See results/README.md.
+02_dhaka_road_topology/pipeline/results/gat/csv/Zone_DH*/
+02_dhaka_road_topology/pipeline/results/gat/plots/
