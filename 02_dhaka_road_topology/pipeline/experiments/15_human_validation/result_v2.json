@@ -1,0 +1,24 @@
+{
+  "raters": [
+    "Sabbir Hossain"
+  ],
+  "n_rows": 68,
+  "cant_judge_rate": 0.0,
+  "self_consistency": {
+    "Sabbir Hossain": 0.875
+  },
+  "cohen_kappa": {},
+  "class_means": {
+    "organic": 0.4186334990590321,
+    "mixed": 0.47625583911746944,
+    "grid": 0.6202669173002946
+  },
+  "directional_ok": true,
+  "ordinal_rho": 0.441647637064291,
+  "ordinal_p": 0.00016311237365475057,
+  "auc": 0.7663817663817665,
+  "auc_p": 0.0004997501249375312,
+  "agreement": 0.7547169811320755,
+  "target": 0.85,
+  "met_target": false
+}

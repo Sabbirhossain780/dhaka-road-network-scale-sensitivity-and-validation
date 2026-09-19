@@ -1171,3 +1171,203 @@ instrument.
 result with density-controlled correlations only; note the Gini sign reversal explicitly as a
 worked example of why the density control matters. Phase 0 closed — the conflict is resolved and
 the direction of the correction is known.
+
+---
+
+## Experiment 15 (Phase 2) — Blind human validation: the measure does NOT meet the proposal's bar
+
+**Hypothesis:** the proposal set an n=30, ≥85% agreement validation target that this project has
+never met. Experiments 08-11 made it well-posed for the first time, because a 400m patch
+plausibly has one morphology where a 2km zone does not. Test: label 40 blind patches, compare to
+`grid_score`.
+
+**Method:** 46 items (40 unique + 6 repeats), stratified across 10 grid-score deciles, ≥800m
+apart, randomised order, no scores or zone ids in the page. ROC AUC pre-registered as primary;
+the grid/organic boundary pre-registered as Experiment 11's existing `grid_score > null_p95`.
+`score.py` was written before any label existed. Single labeller (the project author).
+Scripts: `15_human_validation/build_instrument.py`, `score.py`.
+**Figure:** `human_validation.png`.
+
+### Result — the target is not met
+
+| | Value | Target |
+|---|---|---|
+| Agreement at the pre-registered threshold | **68.0%** | ≥85% |
+| ROC AUC (primary) | **0.663**, p = 0.083 | significant |
+| Self-consistency (6 repeats) | **66.7%** (4/6) | — |
+| Labelled "unclear" | **21/46 (46%)** | — |
+
+**The patch grid-score is not validated against human judgement at the proposal's standard.**
+AUC 0.663 is not distinguishable from chance (permutation p = 0.083, 95th percentile of the null
+0.686). Agreement is 68.0% against an 85% target.
+
+### Three things that complicate — but do not rescue — that verdict
+
+**1. The self-consistency ceiling is 66.7%.** The labeller re-labelled 2 of 6 repeated patches
+differently, including one outright flip (P018: "organic", then "grid"). 68.0% agreement is
+therefore *102% of what was achievable* — the measure agrees with the labeller about as well as
+the labeller agrees with themselves. But a ceiling that low cannot support a positive claim; it
+says the task as posed is too noisy to validate anything.
+
+**2. The instrument had a design flaw, and it is mine.** The "unclear" button was described as
+*"genuinely mixed, or too little road to judge"* — two completely different things behind one
+control. The data shows it was used almost entirely for the second:
+
+| Label | n | median road length | mean segments | mean grid_score |
+|---|---|---|---|---|
+| grid | 13 | — | 164.3 | 0.571 |
+| organic | 12 | — | 80.9 | 0.451 |
+| **unclear** | **21** | **1,203 m** | **21.9** | **0.333** |
+| (decided) | 25 | 4,570 m | — | 0.513 |
+
+Mann-Whitney on road length, unclear vs decided: **p < 0.0001**. Unclear patches carry roughly a
+quarter of the road of decided ones. Strata 0-1 (most organic) were labelled 9/10 "unclear", not
+"organic" — so the low end of the scale was never actually tested against a human judgement of
+"organic". That cost 21 of 46 items and is the main reason the test is underpowered.
+
+**3. But restricting to judgeable patches does not help.** AUC 0.663 *is* the decided-only
+number — the 21 unclear items were already excluded from it. There is no subgroup in which the
+measure performs to target.
+
+### A consequence for Experiment 11 that must be recorded
+
+Experiment 11 treated a window as scorable above **500 m** of road. This experiment shows humans
+cannot judge morphology anywhere near that floor: **0 of 16** patches above 3,000 m were called
+unclear, versus 21 of 46 above 500 m. Half of Experiment 11's city map therefore covers fabric
+too sparse for a human to assign a morphology to at all.
+
+| Road-length floor | Exp 11 clean windows | within-zone sd | between-zone sd | ratio |
+|---|---|---|---|---|
+| 500 m (**as published**) | 60,460 (100%) | 0.216 | 0.106 | 2.0× |
+| 1,500 m | 47,105 (77.9%) | 0.182 | 0.083 | 2.2× |
+| 3,000 m | 29,731 (49.2%) | 0.150 | 0.088 | 1.7× |
+
+**Experiment 11's headline is robust to the floor** (2.0× → 2.2× → 1.7×), so its conclusion
+stands. But its per-window scores below ~1,500 m should be treated as unverified, and the map
+should be read with the sparse half greyed out rather than coloured.
+
+### What signal there is
+
+Across all 46 items, `Spearman(stratum, labelled grid) = +0.358, p = 0.015`, and the extremes
+behave: stratum 9 gave 3 grid / 0 organic, strata 0-1 gave 0 grid. So the measure's **high end is
+recognisable to a human**. What fails is binary discrimination across the middle, and the low end
+was never tested because those patches were called unclear.
+
+### Decision — report as a negative result, and rebuild the instrument as a separate test
+
+This goes in the thesis as a failed validation, not as a footnote. The measure remains useful as
+a *relative* city-scale variable (Experiments 11, 13 and 14 all rest on aggregate behaviour,
+which is unaffected), but **no claim should be made that it reproduces human morphology
+judgement at patch level.**
+
+A second run is justified — the flaws are identified design errors, not post-hoc dissatisfaction
+with the number — but it must be run as a separate pre-registered test whose result is reported
+whatever it says, not as a retry until the number improves. Required changes:
+1. Split "unclear" into **"mixed"** and **"can't judge — too little road"**. Conflating them
+   destroyed half this sample.
+2. Raise the sampling density floor to **≥1,500 m** of road per patch, and stratify *within* that
+   pool so the organic end is represented by patches a human can actually assess.
+3. **A second labeller**, which this run could not provide. With self-consistency at 66.7%, a
+   single rater cannot establish anything; inter-rater agreement is the missing quantity and is
+   precisely what the proposal's "expert panel" design existed to supply.
+4. More decided items — 25 is underpowered for an AUC test.
+
+---
+
+## Experiment 15b — Corrected validation: the measure discriminates, but still misses the 85% bar
+
+**Status: a separate pre-registered test, not a retry.** Experiment 15's negative result stands
+in this log unchanged. The four changes below were each forced by a specific v1 post-mortem
+finding, `score_v2.py` was written before any v2 label existed, and the analysis is exactly what
+`design_v2.json` fixed in advance. 60 fresh patches (v1's 40 excluded) + 8 repeats = 68 items,
+sampled at ≥1,500 m of road per 400 m window, stratified across 10 deciles, ≥800 m apart.
+
+### The instrument fixes worked
+
+| | v1 | v2 |
+|---|---|---|
+| "can't judge" / "unclear" | **46%** | **0%** |
+| Self-consistency (repeats) | 66.7% (4/6) | **88%** (7/8) |
+| Decided items | 25 | **53** |
+
+Separating "mixed" (an answer about morphology) from "can't judge" (a complaint about the data),
+and raising the density floor from 500 m to 1,500 m, eliminated the unjudgeable category
+entirely and lifted self-consistency by over 20 points. **v1's low ceiling was an artifact of my
+instrument, not a property of the task.**
+
+### Pre-registered results
+
+| Test | Result | v1 |
+|---|---|---|
+| **PRIMARY** ROC AUC, grid vs organic | **0.766**, p = **0.0005** | 0.663, p = 0.083 |
+| **SECONDARY** ordinal Spearman (organic<mixed<grid) | **+0.442**, p = 0.0002 | — |
+| **DIRECTIONAL** mean grid_score ordering | **held** | failed |
+| **AGREEMENT** at `grid_score > null_p95` | **75.5%** | 68.0% |
+
+**The directional prediction held**, and this is the substantive one. Mean `grid_score`:
+organic **0.419** < mixed **0.476** < grid **0.620**. In v1 the equivalent prediction failed —
+"unclear" sat at the *bottom* of the scale, because it meant "can't see". With the meanings
+separated, a human "mixed" judgement lands between the two pure classes exactly as a mixture
+measure requires. That is direct evidence the measure tracks morphological mixture rather than
+something else.
+
+**But agreement is 75.5% against the proposal's 85% target. The target is not met.**
+
+### Why it falls short — and why this is not a calibration problem
+
+The confusion matrix shows an asymmetric failure:
+
+| | measure: grid | measure: organic |
+|---|---|---|
+| **human: grid** | 24 | 2 |
+| **human: organic** | 11 | 16 |
+
+The measure finds **92%** of human-grid patches but correctly rejects only **59%** of
+human-organic ones. It over-calls grid.
+
+The obvious explanation would be a mis-set threshold, but that is ruled out: the best accuracy
+achievable at *any* single global cut-point is **73.6%** — *lower* than the adaptive
+`null_p95` rule's 75.5%, which is a point in that rule's favour. And the class distributions
+genuinely overlap: human-grid IQR **0.494-0.716**, human-organic IQR **0.305-0.549**. **No
+threshold on this measure alone reaches 85%**, so the shortfall is a property of the measure's
+discriminative power, not of where the line is drawn.
+
+Agreement is 86% of the 88% self-consistency ceiling, so the residual gap to the ceiling is
+small; the gap to *target* is the real one.
+
+### A hypothesis that came out of the failure analysis — explicitly post-hoc
+
+I predicted the false positives would be **corridor**-like, since Experiment 10 (C4) established
+that a single corridor has high \|c₂\| like a grid but also high \|c₁\|. **That prediction was
+wrong.** The 11 false positives have \|c₁\| = 0.201, essentially identical to the true positives'
+0.195; the true negatives are the ones with elevated \|c₁\| (0.398). They are not corridors —
+they are patches with real orthogonal structure that a human still reads as organic.
+
+Measured post-hoc on this sample:
+
+| Feature | AUC |
+|---|---|
+| `grid_score` (**pre-registered**) | 0.766 |
+| \|c₂\| alone | 0.832 |
+| \|c₂\| − \|c₁\| | 0.850 |
+
+**These are post-hoc and are not results of this experiment.** They are a hypothesis — that the
+raw second harmonic may discriminate better than the `grid_score` composite built on top of it —
+for a future pre-registered test on a fresh sample. Quoting 0.850 as this experiment's finding
+would be exactly the fitting-after-the-fact that the pre-registration exists to prevent.
+
+### Verdict — partial validation
+
+**The patch grid-score is validated as a discriminator and not validated at the proposal's
+agreement standard.** Both halves belong in the thesis:
+
+- It separates human grid from human organic highly significantly (AUC 0.766, p = 0.0005), and
+  orders human "mixed" between the two as a mixture measure must.
+- It reaches 75.5% agreement against an 85% target, and the overlapping class distributions mean
+  no re-thresholding closes that gap.
+- **Still a single rater.** Inter-rater reliability — the quantity the proposal's expert-panel
+  design existed to supply — remains unmeasured, and no number above can substitute for it.
+
+This is strong enough to support the aggregate uses the measure is actually put to (Experiments
+11, 13 and 14 all rest on city-scale behaviour), and not strong enough to support per-patch
+claims about individual locations.

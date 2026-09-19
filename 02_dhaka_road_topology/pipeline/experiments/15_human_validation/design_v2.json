@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "n_unique": 60,
+  "n_repeat": 8,
+  "n_items": 68,
+  "min_road_m": 1500.0,
+  "strata": 10,
+  "per_stratum": 6,
+  "min_sep_m": 800.0,
+  "seed": 20262,
+  "excluded_v1_patches": true,
+  "labels": [
+    "grid",
+    "organic",
+    "mixed",
+    "cant_judge"
+  ],
+  "primary": "ROC AUC grid_score, grid vs organic",
+  "secondary": "ordinal Spearman organic<mixed<grid",
+  "directional_prediction": "mean grid_score: organic < mixed < grid",
+  "agreement_rule": "grid_score > null_p95 (Experiment 11)",
+  "target": 0.85
+}

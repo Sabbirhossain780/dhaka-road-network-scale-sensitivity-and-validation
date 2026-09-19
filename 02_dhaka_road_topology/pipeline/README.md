@@ -157,10 +157,28 @@ their own, independent of the clustering work above.
   (Experiment 09's own numbers were later found to carry a rasterization
   artifact and are superseded by Experiment 10's vector recompute; the
   conclusion held and strengthened.)
-- **The satellite validation (Experiment 07) was a small, single-reviewer
-  sample** (7 zones) — not the original proposal's planned n=30
-  expert-morphological-assessment panel. The 7/7 agreement is a genuine
-  signal, not a substitute for that more rigorous check.
+- **The patch grid-score is partially validated** (Experiments 15 / 15b). A
+  first blind run failed outright (68.0% agreement, AUC 0.663 p=0.083), but its
+  post-mortem traced that to an instrument flaw of mine — one "unclear" button
+  covering both "genuinely mixed" and "too little road to judge" — which
+  swallowed 46% of items. A corrected, separately pre-registered run at
+  n=60 fresh patches with a 1500m density floor gives:
+  **ROC AUC 0.766 (p=0.0005)** and mean grid_score ordering
+  organic 0.419 < mixed 0.476 < grid 0.620 exactly as a mixture measure
+  requires. So the measure **does** discriminate, significantly.
+  **But agreement is 75.5% against the proposal's 85% target — not met**, and
+  this is not fixable by re-thresholding: the class distributions overlap
+  (grid IQR 0.494-0.716, organic 0.305-0.549) and the best achievable single
+  cut-point gives only 73.6%. The measure supports the aggregate, city-scale
+  uses it is actually put to (Experiments 11, 13, 14) but **not per-patch
+  claims about individual locations.**
+- **Inter-rater reliability remains unmeasured.** Both validation runs had a
+  single labeller (the author). That is precisely what the proposal's
+  expert-panel design existed to supply, and no single-rater statistic
+  substitutes for it.
+- **The earlier satellite validation (Experiment 07) was a small, single-reviewer
+  sample** (7 zones), and Experiment 08 then showed its zone-level labels were
+  unreliable anyway.
 - **The size-confound correction (Experiment 06) is not perfectly clean.**
   A ~3x mean node-count gap remains between the two clusters after
   regressing out `log(node_count)` (down from ~15x before) — better, but
@@ -293,8 +311,24 @@ analysis from what's tracked here.
 - [ ] **Add a spatial convergence measure for "radial"** — Experiment 10 (C7) showed radial has
       no stable angular signature, so it cannot come from the |c_k| descriptor at all.
 - [ ] Add a smoke config (`gat_max_zones` set low) for fast sanity checks
-- [ ] Run the Experiment 07 satellite check at proper scale (n=30, ideally a second reviewer)
-      to actually meet the original proposal's validation target rather than approximate it
+- [x] Run the validation at proper scale — done as Experiment 15 (n=40 blind patches, stratified,
+      pre-registered). **It did not meet the target**: 68.0% agreement vs 85%, AUC 0.663 (p=0.083),
+      self-consistency only 66.7%. Reported as a negative result.
+- [x] **Re-run Experiment 15 with a corrected instrument** — done as Experiment 15b. The
+      instrument fixes worked (can't-judge 46% -> 0%, self-consistency 66.7% -> 88%) and the
+      measure now discriminates significantly (AUC 0.766, p=0.0005), but agreement is 75.5%
+      vs the 85% target.
+- [ ] **Recruit a second labeller** — still the outstanding gap. `labelling_tool_v2.html`
+      already records rater identity and gives each rater an independently shuffled order;
+      `score_v2.py` computes Cohen's kappa automatically once two raters exist.
+- [ ] **Pre-register a test of |c2| against grid_score on a fresh sample** — Experiment 15b's
+      post-hoc failure analysis suggests the raw second harmonic may discriminate better
+      (AUC 0.832 vs 0.766) than the composite built on it. Post-hoc on that sample, so it needs
+      its own test; do not cite 0.832 as a result.
+- [ ] **Re-draw the Experiment 11 map with the sparse half greyed out** — Experiment 15 showed
+      humans cannot judge morphology below ~1500m of road per 400m window, while Experiment 11's
+      floor was 500m. The headline within/between ratio is robust to the floor (2.0x/2.2x/1.7x at
+      500/1500/3000m) but per-window scores below ~1500m are unverified.
 - [ ] Tighten the size-confound correction in Experiment 06 — a ~3x zone-size gap remains
       between clusters after decorrelation; worth investigating whether a stronger
       (e.g. non-linear) size correction removes it further without destroying the real signal

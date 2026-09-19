@@ -1,0 +1,15 @@
+{
+  "n_labelled": 46,
+  "n_decided": 25,
+  "n_unclear": 21,
+  "self_consistency": 0.6666666666666666,
+  "auc": {
+    "grid_score": 0.6634615384615384,
+    "excess": 0.6634615384615384,
+    "c2": 0.6570512820512822
+  },
+  "auc_p": 0.08245877061469266,
+  "accuracy_preregistered": 0.68,
+  "target": 0.85,
+  "met_target": false
+}
