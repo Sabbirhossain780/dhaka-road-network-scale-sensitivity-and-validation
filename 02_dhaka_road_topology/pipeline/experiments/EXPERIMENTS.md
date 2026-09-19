@@ -1092,3 +1092,82 @@ arc — zone-level typology is ill-posed, here is convergent evidence from four 
 here is the measurable replacement, here is the city map, and here is what it is for. Remaining
 items (multi-scale windows, a radial convergence measure, fixing `uffm.py:161` and
 `tiling.py:112`) are refinements that do not change the story.
+
+---
+
+## Experiment 14 (Phase 0) — Is geometry really orthogonal to routing vulnerability?
+
+**Why this exists:** the thesis states —
+
+> *"Orientation entropy shows no correlation with betweenness concentration (Spearman r=0.02;
+> p=0.58) establishing that street geometry and routing vulnerability are orthogonal."*
+
+Experiment 13 contradicts the conclusion: organic fabric has a 52% higher articulation-point
+rate, and the critical-node/cut-vertex relationship reverses sign with local morphology. Neither
+is possible if geometry and vulnerability are orthogonal. Since this is a claim already written
+into the paper, it had to be settled before any further writing.
+
+**Method:** hold the vulnerability measures fixed; swap the geometry measure. Five vulnerability
+measures from `all_zones_summary.csv` and `features.csv`, tested first against the paper's own
+zone-level `orientation_entropy`, then against Experiment 11's 400m patch grid-ness pooled into
+the same 1km zones (median 110 windows per zone). n = 785 zones. Density controlled throughout
+via partial correlation on log node density. Script: `14_orthogonality_recheck/run.py`.
+**Figure:** `orthogonality_recheck.png`.
+
+### Result 1 — the paper's specific claim is correct
+
+`orientation_entropy` vs `max_bc`: **r = +0.010, p = 0.776**. That pairing genuinely is null,
+closely reproducing the paper's reported r=0.02, p=0.58. Nothing wrong with the measurement.
+
+### Result 2 — but the generalisation fails, on the paper's own geometry measure
+
+| Vulnerability measure | Spearman vs orientation entropy | p |
+|---|---|---|
+| max betweenness (**the tested pairing**) | +0.010 | 0.776 |
+| betweenness Gini | +0.067 | 0.062 |
+| p99 betweenness | −0.016 | 0.658 |
+| **articulation-point fraction** | **+0.214** | **<0.0001** |
+| tier-1 node fraction | −0.031 | 0.385 |
+
+The paper generalised from row 1 to "geometry and routing vulnerability are orthogonal", but
+**articulation-point fraction was never tested and is clearly not null** — using the paper's own
+blunt zone-level geometry measure.
+
+### Result 3 — and zone-level geometry was hiding the rest
+
+Swapping in 400m patch grid-ness, every one of the five becomes significant, and patch-level is
+stronger on **5/5** measures:
+
+| Vulnerability measure | zone-level \|r\| | patch-level \|r\| | patch, density-controlled | p |
+|---|---|---|---|---|
+| max betweenness | 0.010 | **0.571** | −0.163 | <0.0001 |
+| betweenness Gini | 0.067 | **0.400** | −0.143 | 0.0001 |
+| p99 betweenness | 0.016 | **0.631** | −0.153 | <0.0001 |
+| articulation-point fraction | 0.214 | **0.543** | −0.210 | <0.0001 |
+| tier-1 node fraction | 0.031 | **0.586** | −0.167 | <0.0001 |
+
+**Critical caveat — most of the raw patch-level relationship is density.** Partial correlations
+fall from 0.40-0.63 to 0.14-0.21 once log node density is removed. The effects remain highly
+significant and consistently negative (more grid-like → less vulnerable, agreeing with
+Experiment 13), but they are modest, not the large raw values.
+
+**`betweenness_gini` reverses sign under the control: +0.400 raw, −0.143 partial.** The raw
+positive was entirely density-driven. This is a Simpson's-paradox reversal, and it means **the
+raw patch-level correlations must not be quoted** — only the density-controlled ones.
+
+### What this means for the thesis
+
+The sentence as written is **too strong and should be narrowed**. The defensible version is that
+*zone-level orientation entropy does not predict maximum betweenness concentration* — a specific
+null about a specific pairing, not a general orthogonality of geometry and vulnerability.
+
+This is not a retraction, it is a sharper result, and it is the same lesson as Experiments 08-13
+arriving from a fourth direction: **a null from a zone-level geometry measure is evidence that
+the measure is too blunt at that scale, not that the relationship is absent.** The paper
+currently reads that null as a property of Dhaka. It is better read as a property of the
+instrument.
+
+**Decision.** Narrow the orthogonality claim to the pairing actually tested; add the patch-level
+result with density-controlled correlations only; note the Gini sign reversal explicitly as a
+worked example of why the density control matters. Phase 0 closed — the conflict is resolved and
+the direction of the correction is known.

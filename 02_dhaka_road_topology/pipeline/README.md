@@ -235,6 +235,15 @@ analysis from what's tracked here.
 
 ## TODO
 
+- [ ] **Narrow the thesis's orthogonality claim** — the paper states that orientation entropy
+      shows no correlation with betweenness concentration, "establishing that street geometry
+      and routing vulnerability are orthogonal". Experiment 14 confirms that exact pairing is
+      null (r=+0.010, p=0.78) but shows the generalisation fails: articulation-point fraction
+      correlates at +0.214 (p<0.0001) with the same geometry measure, and with 400m patch
+      grid-ness all five vulnerability measures are significant after controlling density.
+      The claim should be narrowed to the pairing actually tested.
+
+
 - [ ] Address the clustering weakness above — try a richer or different
       feature set before treating k=2 as a real finding
 - [x] Validate the `tile` stage — done via the 2km grid run (Experiment 03), 224/234 zones
