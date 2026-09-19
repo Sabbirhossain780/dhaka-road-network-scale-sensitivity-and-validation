@@ -146,6 +146,45 @@ def extract_fingerprints(config) -> pd.DataFrame:
     return fingerprints_df
 
 
+def circular_wasserstein(p: np.ndarray, q: np.ndarray) -> float:
+    """Wasserstein distance on a RING, for the folded [0,180) bearing axis.
+
+    Optimal transport on a circle shifts by the median of the CDF difference;
+    without that shift the metric charges for wrap-around, treating 179 deg and
+    1 deg as far apart when they are 2 deg apart.
+    """
+    d = np.cumsum(np.asarray(p, dtype=float) - np.asarray(q, dtype=float))
+    return float(np.abs(d - np.median(d)).mean())
+
+
+def bearing_harmonics(h: np.ndarray, kmax: int = 6) -> np.ndarray:
+    """|c_k| / |c_0| of a circular bearing histogram -- rotation-invariant.
+
+    Rotating the network circularly shifts h, which multiplies each Fourier
+    coefficient by a pure phase, so the magnitudes are unchanged. On a folded
+    [0,180) axis |c_2| carries grid-ness and |c_1| a single dominant axis
+    (Experiment 10: a corridor's |c_2| is as high as a grid's, so |c_2| alone
+    does not identify a grid -- low |c_1| AND high |c_2| does).
+    """
+    c = np.fft.rfft(np.asarray(h, dtype=float))
+    return np.abs(c[1:kmax + 1]) / (np.abs(c[0]) + 1e-12)
+
+
+def harmonic_distance(p: np.ndarray, q: np.ndarray) -> float:
+    return float(np.linalg.norm(bearing_harmonics(p) - bearing_harmonics(q)))
+
+
+def _bearing_distance(p, q, x_axis, mode: str) -> float:
+    if mode == "circular":
+        return circular_wasserstein(p, q)
+    if mode == "harmonic":
+        return harmonic_distance(p, q)
+    if mode == "linear":
+        return wasserstein_distance(x_axis, x_axis, p, q)
+    raise ValueError(f"unknown uffm_bearing_metric: {mode!r} "
+                     "(expected 'linear', 'circular' or 'harmonic')")
+
+
 def build_distance_matrix(fingerprints_df: pd.DataFrame, config) -> pd.DataFrame:
     bearing_cols = [f"b_{i}" for i in range(config.bearing_bins)]
     angle_cols = [f"a_{i}" for i in range(config.angle_bins)]
@@ -162,11 +201,16 @@ def build_distance_matrix(fingerprints_df: pd.DataFrame, config) -> pd.DataFrame
     x_angle = np.linspace(0, 1, config.angle_bins)
     x_length = np.linspace(0, 1, config.length_bins)
 
+    mode = getattr(config, "uffm_bearing_metric", "linear")
+    if mode != "linear":
+        log.warning("UFFM bearing metric is %r, not the historical 'linear' -- "
+                    "uffm_* outputs will NOT match the original notebooks", mode)
+
     dist_matrix = np.zeros((N, N), dtype=np.float32)
     for i in tqdm(range(N), desc="Wasserstein distances"):
         for j in range(i + 1, N):
             d = (
-                config.w_bearing * wasserstein_distance(x_bearing, x_bearing, B[i], B[j]) +
+                config.w_bearing * _bearing_distance(B[i], B[j], x_bearing, mode) +
                 config.w_angle * wasserstein_distance(x_angle, x_angle, A[i], A[j]) +
                 config.w_length * wasserstein_distance(x_length, x_length, L[i], L[j])
             )

@@ -105,13 +105,26 @@ def extract_zones(G, grid_gdf: gpd.GeoDataFrame, config) -> pd.DataFrame:
         zone_dir = os.path.join(config.data_zones, zone_id)
         os.makedirs(zone_dir, exist_ok=True)
 
+        # The graph is metric-projected, so d["x"]/d["y"] are UTM, not lon/lat.
+        # This previously read `d.get("lon", d.get("x", 0))`, and because a
+        # projected OSMnx graph has no "lon" attribute it silently fell through
+        # to the UTM easting -- so every zone's nodes.csv carried UTM in its
+        # lon/lat columns (found in Experiment 13). Inverse-project instead,
+        # reusing the transformer already built above for the cell centroid.
+        node_items = list(subG.nodes(data=True))
+        if node_items:
+            node_lon, node_lat = transformer.transform(
+                [d.get("x", 0.0) for _, d in node_items],
+                [d.get("y", 0.0) for _, d in node_items])
+        else:
+            node_lon, node_lat = [], []
         node_rows = [{
             "node_id": n,
             "x_utm": round(d.get("x", 0), 3),
             "y_utm": round(d.get("y", 0), 3),
-            "lon": round(d.get("lon", d.get("x", 0)), 6),
-            "lat": round(d.get("lat", d.get("y", 0)), 6),
-        } for n, d in subG.nodes(data=True)]
+            "lon": round(lo, 6),
+            "lat": round(la, 6),
+        } for (n, d), lo, la in zip(node_items, node_lon, node_lat)]
         pd.DataFrame(node_rows).to_csv(os.path.join(zone_dir, "nodes.csv"), index=False)
 
         link_rows = [{

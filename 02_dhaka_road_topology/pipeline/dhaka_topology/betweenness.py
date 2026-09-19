@@ -85,6 +85,11 @@ def load_zone_for_bc(data_zones_dir: str, zone_id: str):
     nodes_df = pd.read_csv(os.path.join(zone_dir, "nodes.csv"))
     links_df = pd.read_csv(os.path.join(zone_dir, "links.csv"))
 
+    # Compatibility shim for zone data written before the tiling.py lon/lat fix
+    # (Experiment 13): those files carry UTM in their lon/lat columns. Freshly
+    # tiled zones take the else branch. Both paths produce identical output, so
+    # cached zone data stays usable -- do not remove until all zone data is
+    # regenerated.
     if nodes_df["lon"].mean() > 1000:  # UTM stored in the lon column
         lons, lats = utm46n_to_wgs84(nodes_df["x_utm"].values, nodes_df["y_utm"].values)
     else:

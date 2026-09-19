@@ -63,6 +63,25 @@ class Config:
     w_bearing: float = 0.40
     w_angle: float = 0.35
     w_length: float = 0.25
+    # How to compare two street-BEARING fingerprints. Bearing is a CIRCULAR
+    # variable folded to [0,180), so the default is mathematically wrong:
+    #   "linear"   - Wasserstein on a linear axis. Treats bin 0 and bin 35 as
+    #                maximally far apart when they are 5 degrees apart, and is
+    #                rotation-VARIANT: Experiment 12 showed that rotating a real
+    #                zone moves it 20% further than a genuinely different zone.
+    #   "circular" - Wasserstein on a ring. Fixes wrap-around, but circular
+    #                transport still charges for the shift, so still not
+    #                rotation-invariant.
+    #   "harmonic" - |c_k| magnitudes of the circular Fourier coefficients.
+    #                Rotation-invariant BY CONSTRUCTION (a rotation changes only
+    #                phase), so a rotated grid scores identically to an aligned
+    #                one. This is the correct choice for a morphology metric.
+    # Default stays "linear" ONLY so the pipeline keeps reproducing the original
+    # notebooks bit-for-bit and matches the committed results/ snapshot. It is
+    # known-defective; set "harmonic" when regenerating results. Experiment 12
+    # found the choice does not rescue UFFM either way -- its k=2 split is a
+    # density split, not a geometry one.
+    uffm_bearing_metric: str = "linear"
 
     # ── GAT / betweenness-hierarchy stage ───────────────────────────────
     gat_enabled: bool = True

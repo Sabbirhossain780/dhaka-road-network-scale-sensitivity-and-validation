@@ -49,7 +49,7 @@ dhaka_topology/            the pipeline package
   pipeline.py                      stage orchestration
 
 configs/                   one YAML per variant (v1, v3, v2km, thana)
-tests/                     12 unit tests on the pure functions
+tests/                     17 unit tests on the pure functions
 compare_outputs.py         diffs this pipeline's output against the
                             original notebooks' saved results
 results/                   a full run's output (see below) — this is the
@@ -189,7 +189,17 @@ column-by-column against the notebooks' saved CSVs.
 | Features | `features_normalized.csv` | **exact match** |
 | Clustering | `cluster_assignments.csv`, `clustering_scores.csv` | **exact match** |
 | Betweenness/GAT | `all_zones_summary.csv`, `all_nodes_bc.csv` (822 zones) | **exact match** (excl. wall-clock timing) |
-| UFFM | `uffm_fingerprints.csv`, `uffm_cluster_assignments.csv`, `uffm_clustering_scores.csv` | **exact match** |
+| UFFM | `uffm_fingerprints.csv`, `uffm_cluster_assignments.csv`, `uffm_clustering_scores.csv` | **exact match** (with `uffm_bearing_metric: linear`, the default) |
+
+**One deliberate divergence is available but off by default.** UFFM compares
+street-bearing fingerprints with `wasserstein_distance` on a *linear* axis,
+although bearing is circular — which makes it rotation-variant (Experiment 12:
+rotating a real zone moves it 20% further than a genuinely different zone does).
+`uffm_bearing_metric` now offers `circular` and `harmonic` (rotation-invariant)
+alternatives. It defaults to `linear` **only** so the pipeline keeps reproducing
+the notebooks bit-for-bit and matches the `results/` snapshot; set `harmonic`
+when regenerating. Experiment 12 found the choice does not change UFFM's
+conclusion either way — its k=2 split is a density split, not a geometry one.
 
 `compare_outputs.py` is the tool that did this diff. It's included so the
 same check can be re-run if the pipeline changes.
@@ -221,8 +231,9 @@ whatever earlier-stage CSVs it needs from disk.
 ```bash
 pytest tests/
 ```
-12 tests on the pure functions: Gini coefficient, orientation entropy,
-UFFM fingerprint histograms, betweenness/tier classification.
+17 tests on the pure functions: Gini coefficient, orientation entropy,
+UFFM fingerprint histograms, betweenness/tier classification, and the
+rotation-invariance properties of the UFFM bearing metrics.
 
 ## What's not here
 
@@ -263,21 +274,22 @@ analysis from what's tracked here.
       flips with local morphology, so the same betweenness rank means a structurally different
       thing in each regime. Outputs: `13_morphology_criticality/nodes_morphology.csv`,
       `window_fragility.csv`.
-- [ ] **Fix `tiling.py:112`** — `"lon": round(d.get("lon", d.get("x", 0)), 6)` falls back to
-      the PROJECTED x on an OSMnx graph, so the `lon`/`lat` columns in every zone's `nodes.csv`
-      actually hold UTM coordinates (both v3 and v2km). No analysis here is affected (all read
-      `x_utm`) and the port validation is unaffected, but anything downstream trusting those
-      columns gets nonsense. Found in Experiment 13.
+- [x] **Fix `tiling.py` lon/lat** — done. Node coordinates are now inverse-projected through
+      the transformer already used for cell centroids (verified to 5e-7 deg on 827 centroids).
+      `betweenness.py` keeps its UTM-detection shim so cached zone data written before the fix
+      still loads; both paths give identical output. Found in Experiment 13.
 - [ ] **Multi-scale run (200/400/800m windows)** — the 400m window is chosen, not derived;
       three rasters would test how fast Dhaka's fabric actually turns over.
 - [ ] Try a sliding patch window instead of a fixed lattice — a grid straddling two patch
       boundaries is currently penalised (Experiment 09 caveat)
-- [ ] **Fix UFFM's fingerprint comparison** — `uffm.py:161` uses linear-axis Wasserstein on a
-      circular bearing variable, making it rotation-VARIANT: rotating a real zone moves it 20%
-      further than a genuinely different zone does (Experiment 12). Worth fixing regardless,
-      but Experiment 12 showed it is NOT the cause of UFFM's null result — UFFM's k=2 split is
-      a density split (η² density 0.36-0.49 vs η² morphology 0.01-0.04), entering through the
-      angle and length terms, not bearing.
+- [x] **Fix UFFM's fingerprint comparison** — done as the `uffm_bearing_metric` config
+      option (`linear` / `circular` / `harmonic`), with rotation-invariance covered by tests.
+      Default stays `linear` to preserve bit-for-bit validation and the `results/` snapshot;
+      see the Validation section. Experiment 12 showed this is NOT the cause of UFFM's null
+      result — its k=2 split is a density split (η² density 0.36-0.49 vs η² morphology
+      0.01-0.04), entering through the angle and length terms, not bearing.
+- [ ] **Regenerate the `results/` snapshot with `uffm_bearing_metric: harmonic`** and retire the
+      `linear` default once the bit-for-bit validation record is no longer needed.
 - [ ] **Add a spatial convergence measure for "radial"** — Experiment 10 (C7) showed radial has
       no stable angular signature, so it cannot come from the |c_k| descriptor at all.
 - [ ] Add a smoke config (`gat_max_zones` set low) for fast sanity checks
