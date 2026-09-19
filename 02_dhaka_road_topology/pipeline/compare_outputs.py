@@ -1,21 +1,18 @@
 #!/usr/bin/env python
 """Compare new pipeline outputs against the original notebook-based outputs.
 
-NOTE: the reference data this script reads (`backup_original_topology/`) was
-deleted during a project cleanup, so the invocation below no longer runs as
-written. The comparison it performed is recorded in ../README.md (Validation)
-and was an exact match across features, clustering, betweenness and UFFM.
-This file is retained as the record of HOW that check was made. To re-establish
-it, re-run the original notebooks (archive/notebooks/) to regenerate their
-outputs, then point --old/--old-gat at those.
+The notebook-era reference outputs live in ../outputs/ and ../gat/ (generated
+March 2026, before the pipeline existed). A duplicate copy under
+backup_original_topology/ was removed in a cleanup; the originals remain, so
+this check is still runnable -- see the usage below.
 
 
 Usage:
     python compare_outputs.py \
-        --old "../../backup_original_topology/02_dhaka_road_topology/outputs/v3" \
-        --new "../../pipeline_outputs/v3/outputs" \
-        --old-gat "../../backup_original_topology/02_dhaka_road_topology/gat" \
-        --new-gat "../../pipeline_outputs/v3/gat"
+        --old "../outputs/v3" \
+        --new "results/original_v3_run_2026-09-17/outputs" \
+        --old-gat "../gat" \
+        --new-gat "results/original_v3_run_2026-09-17/gat"
 
 For each matching CSV, reports whether values are numerically identical
 (within a small float tolerance) — this is the ground-truth check that the

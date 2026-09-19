@@ -54,5 +54,19 @@ desktop.ini
 #     regenerable in ~25 min by re-running the betweenness stage.
 # The city-level figures, the two summary CSVs and every outputs/ file stay
 # tracked. See results/README.md.
-02_dhaka_road_topology/pipeline/results/gat/csv/Zone_DH*/
-02_dhaka_road_topology/pipeline/results/gat/plots/
+02_dhaka_road_topology/pipeline/results/original_v3_run_2026-09-17/gat/csv/Zone_DH*/
+02_dhaka_road_topology/pipeline/results/original_v3_run_2026-09-17/gat/plots/
+
+# Experiment 16: 224 per-zone morphology sheets, 54 MB, regenerate in ~3.5 min
+# with experiments/16_per_zone_morphology/run.py. The index mosaic IS tracked.
+02_dhaka_road_topology/pipeline/experiments/16_per_zone_morphology/zones/
+
+# Archived source material: original notebooks, paper drafts, presentations.
+# Kept locally; repo scope is code + results + README (replaces the old
+# 04_reports_and_papers/ rule now that those files moved into archive/).
+archive/
+
+# Stray copies of figures dropped at the repo root by the chat client.
+# The originals live in 02_dhaka_road_topology/pipeline/results/figures/.
+image-*.png
+image-*.jpg

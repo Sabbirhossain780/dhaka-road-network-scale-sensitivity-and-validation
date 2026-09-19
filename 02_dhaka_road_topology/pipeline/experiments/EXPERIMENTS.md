@@ -1371,3 +1371,38 @@ agreement standard.** Both halves belong in the thesis:
 This is strong enough to support the aggregate uses the measure is actually put to (Experiments
 11, 13 and 14 all rest on city-scale behaviour), and not strong enough to support per-patch
 claims about individual locations.
+
+---
+
+## Experiment 16 — Per-zone morphology sheets (figures, not findings)
+
+**Why:** Experiment 11's city map shows *that* morphological structure exists and varies,
+but as 60,460 coloured dots it is close to unreadable as a description of any particular
+place. This is the per-zone counterpart, and the direct modern replacement for the old
+notebook's 822 per-zone betweenness hierarchy plots.
+
+**Method:** one sheet per zone. Left panel: the 2 km core with its street network drawn,
+divided into a 5x5 lattice of 400 m subgrids, each tinted by grid-score and labelled —
+*where* the grid-like parts are. Right panel: the same 25 subgrids rendered individually
+in matching spatial positions — *what* each part looks like. Scores come from the
+vector-geometry measure of Experiments 10-11 via 4x4 aggregation of Experiment 11's 100 m
+cell histograms, so nothing is recomputed differently.
+Scripts: `16_per_zone_morphology/run.py`, `make_index.py`.
+
+**A deliberate difference from the analysis.** Experiment 11 scores a *sliding* window at
+100 m stride, because a fixed lattice dices a grid spanning a seam and penalises it. For a
+figure that is the wrong trade — overlapping windows cannot be drawn as discrete labelled
+cells. These sheets therefore use a non-overlapping 5x5 lattice: more legible, slightly
+less faithful. The zone-level summary quoted on each sheet comes from the sliding-window
+analysis, not the 25 lattice cells, so sheet headers agree with Experiment 11.
+
+**Output:** 224 sheets in 210 s (54 MB, gitignored, regenerable). Mean lattice mixture
+ratio 0.636, range 0.000-1.000.
+
+**The index is a map.** `index_all_zones.png` places every zone at its real grid position
+from `metadata.csv` (`col_idx`/`row_idx`), so finding a zone means looking at where it is
+rather than scanning filenames. The warm grid-like band through the centre-east and the
+cooler periphery are both visible in the index alone.
+
+**No claims.** This experiment produces figures. Every number on them comes from measures
+established in Experiments 10-11.
