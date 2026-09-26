@@ -1,6 +1,6 @@
 # Grid, Organic, or Neither? Scale-Dependent Morphology and Context-Dependent Criticality in Dhaka's Road Network
 
-MSc thesis work (CSE, BUET). The title is the arc of the project, not a label for
+Class project (CSE, BUET). The title is the arc of the project, not a label for
 its output: it started by asking whether Dhaka's zones sort into a typology (Grid,
 Maze, Radial, Periphery). They don't, at the scale that question was asked. Measured
 instead at 400 m, morphology turns out to be real and continuous — and the payoff

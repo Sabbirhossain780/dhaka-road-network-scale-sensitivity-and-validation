@@ -1,6 +1,6 @@
 # Dhaka Road Topology Pipeline
 
-MSc thesis work (CSE, BUET) on **topology-aware transport policy targeting**: decomposing
+Class project (CSE, BUET) on **topology-aware transport policy targeting**: decomposing
 Dhaka's road network into zones, measuring their structure, and identifying which
 intersections matter and *why they matter differently in different places*.
 
@@ -332,5 +332,5 @@ unit (out of scope by direction).
 
 ## What's not here
 
-Paper drafts, the LaTeX thesis and presentations are kept outside this repo. Raw OSM data
+Paper drafts, the LaTeX write-up and presentations are kept outside this repo. Raw OSM data
 and per-zone intermediates are gitignored — large, and regenerable by running the pipeline.
