@@ -33,8 +33,7 @@ backup_original_topology/
 pipeline_outputs/
 
 # Repo scope: code + results + README only — no paper drafts/presentations
-01_thesis_document/
-04_reports_and_papers/
+01_project_report/
 
 # OS
 .DS_Store
